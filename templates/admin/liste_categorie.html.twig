@@ -1,0 +1,57 @@
+{% extends 'backoffice.html.twig' %}
+
+{% block title %}
+    {{ parent() }}Liste catégorie
+{% endblock %}
+{% block titre %}
+    Liste des catégories
+{% endblock %}
+
+{% block body %}
+
+    {% for message in app.flashes('success') %}
+        <div class="row mt-4">
+            <div class="alert alert-success col-md-12 text-center">
+                {{ message }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Catégories</th>
+            <th scope="col">Actions</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {% for categorie in categories %}
+            <tr class="table-active">
+
+                <td>{{ categorie.nom }}</td>
+
+
+                <td><div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                        <a href="" class="btn btn-primary nav-link active"> Actions</a>
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
+                                <a class="dropdown-item" href="{{ path('modif_categorie',{'id':categorie.id}) }}">Modifier</a>
+                                <a class="dropdown-item" href="{{ path('supprime_categorie',{'id':categorie.id}) }}">Supprimer</a>
+                            </div>
+                        </div>
+
+                    </div></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="d-flex align-items-center" >
+        <button class="btn btn-primary"><a class=" text-decoration-none text-white " href="{{ path('ajout_categorie') }}">Ajouter une catégorie  <i class="fas fa-plus-circle fa-lg"></i></a>
+        </button>
+    </div>
+{% endblock %}
+
+
+

@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+
+    {{ parent() }} Mes commandes
+
+{% endblock %}
+
+ {% block titre %}
+
+     Mes commandes
+
+ {% endblock %}
+{% block body %}
+    <div class="container ">
+        {% if commandes is not empty %}
+
+        {% for commande in commandes %}
+            <table class="table mt-5 mb-5">
+                <thead class="commandethead text-center">
+                <tr>
+                    <th colspan="6"> N° de commande : {{ commande.id }} |  Montant total : {{ commande.montantTotal }} €.  |  Date : {{ commande.date | date('d/m/Y')}}  </th>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <th>Ref</th>
+                    <th>Photo</th>
+                    <th>Quantité</th>
+                    <th>Prix Total</th>
+                    <th>Annuler</th>
+                </tr>
+                </thead>
+                <tbody class="text-center">
+
+                {% for item in commande.achats %}
+                    <tr>
+
+                        <td>{{ item.article.nom }}</td>
+                        <td>{{ item.article.ref }}</td>
+                        <td>
+                            <img height="40" width="40" src="{{ asset('Photos/') }}{{ item.article.photo }}"
+                                 alt="{{ item.article.nom }}">
+                        </td>
+                        <td>{{ item.quantite }}</td>
+
+                        <td>{{ item.article.prix * item.quantite }} €</td>
+
+                        <td>
+                            <a href="#">
+                                <button class="btn btn-outline-danger btn-rounded">Supprimer</button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        {% endfor %}
+    {% else %}
+    <div class="d-flex flex-column text-center">
+        <div class="mt-4 mb-4">
+            <h4> Vous n'avez passé aucune commande.</h4>
+        </div>
+        <div class="mt-4 mb-4">
+            <button class="btn btn-primary rounded"><a class="text-white text-decoration-none" href="{{ path('home') }}">Retour
+                    à la boutique</a></button>
+        </div>
+        {% endif %}
+    </div>
+    </div>
+{% endblock %}

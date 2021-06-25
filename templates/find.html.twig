@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container contpanier">
+        <div class="row justify-content-center mt-4 mb-4">
+            <div class="col text-center"><h1> Résultat de votre recherche</h1></div>
+        </div>
+
+
+        <div class="col-md-12">
+                <div class="row  mt-4 d-flex">
+
+                    {% for article in articles %}
+                        <div class="col-md-3 d-flex ">
+
+                            <div style="width: 15rem" class="card mb-3 cardclass">
+                                <div class="cardcontour cardclass card mb-3 d-flex align-items-center">
+
+                                    <img class="cardimg" src="{{ asset('photos/') }}{{ article.photo }}" height="auto"
+                                         width="300"
+                                         alt="">
+
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">{{ article.nom }}</h5>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <p class="card-text text-center">{{ article.description }}.</p>
+                                    </div>
+
+                                    <ul class="list-group list-group-flush text-center border-0">
+                                        <li class="list-group-item ">{{ article.prix }} €</li>
+                                    </ul>
+
+                                </div>
+                                <div class="text-center buttonadd mb-2">
+                                    <a href="{{ path('addcart',{id:article.id, 'param':"home"}) }}">
+                                        <button type="button" class="btn btn-outline-primary btn-sm w-100">Ajouter au panier
+                                            <i
+                                                    class="fas fa-shopping-cart"></i>
+                                        </button>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+        <div class="row justify-content-center mb-5">
+            <div class="pagination-small ps-5 col-md-4 text-center paginationposition">
+                <div class="pagination">
+                    {{ knp_pagination_render(articles) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block titre %}
+    Résultat de recherche
+{% endblock %}
+
+{% block title %}
+    {{ parent() }}Résultat de recherche
+{% endblock %}
+
+

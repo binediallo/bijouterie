@@ -1,0 +1,62 @@
+{% extends 'backoffice.html.twig' %}
+
+{% block title %}
+    {{ parent() }}Ajout promotion
+{% endblock %}
+{% block titre %}
+    Gestion des promotions
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+
+        {% for message in app.flashes('success') %}
+            <div class="row mt-4">
+                <div class="alert alert-success col-md-12 text-center">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+
+
+        <div class="row justify-content-center mb-5">
+
+            <div class="col-md-6">
+                {{ form_start(formu) }}
+                <div>
+                    <label for="">Code promotionnel</label>
+                    {{ form_row(formu.nom) }}
+                </div>
+                <div>
+                    <label for="">Remise</label>
+                    {{ form_row(formu.remise) }}
+                </div>
+                <div>
+                    <label for="">Montant Minimum</label>
+                    {{ form_row(formu.montantmin) }}
+                </div>
+
+                <div class="d-flex justify-content-center">
+                    <div class="mt-4 me-4">
+                        {{ form_row(formu.Valider) }}
+                    </div>
+
+                    <button class="btn btn-primary  mt-4 buttonretouralaliste">
+                        <a class="text-decoration-none text-white" href="{{ path('liste_promos') }}">Retour à la liste des
+                            promotion</a>
+                    </button>
+                </div>
+            </div>
+
+
+        </div>
+        {{ form_end(formu) }}
+
+    </div>
+
+    </div>
+
+
+{% endblock %}

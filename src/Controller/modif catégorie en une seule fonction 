@@ -1,0 +1,213 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Article;
+use App\Entity\Categorie;
+use App\Form\ArticleType;
+use App\Form\CategorieType;
+use App\Repository\ArticleRepository;
+use App\Repository\CategorieRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class AdminController extends AbstractController
+{
+
+
+    /**
+     * @Route("/ajout_article",name="ajout_article")
+     */
+    public function ajout_article(Request $request, EntityManagerInterface $manager)
+    {
+        //ici cette fonction a pour but d'afficher le formulaire d'ajout et de traiter le formulaire si envoyé.
+        //Lors d'une reception de données de type POST, GET ,FILE, COOKIE, Request (de httpfoundation) doit être appelé, en effet c'est lui qui receptionne toutes les informations de nos superglobales.
+        //Lors d'une modification en BDD (insertion, modification ou suppression ), le manager d'entityManagerInterface (de l'ORM Doctrine) doit systématiquement être appelé
+
+        $article= new Article(); //ici on instancie un objet Article vide
+        //que l'on va charger avec les informations réceptionnées du formulaire grace à Request
+
+        $form=$this->createForm(ArticleType::class,$article, array('ajouter'=>true) );
+        // ici on instancie un objet Form qui va controller automatiquement la correspondance des champs de formulaire demandés dans ArticleType avec les propriétés de notre entité article.
+        //La méthode createForm() attent 2 arguments, le 1er le nom du formulaire (Type) à utiliser et l'entité correspondante à ce formulaire.
+
+        $post=$request->request; // ici on récupère les données en de $_POST
+        // si on souhaite récupérer les données de $_GET la commande serait
+        // $get=$request->query
+
+        //dump($request); // dump() équivalent de var_dump() en PHP et apparaissant dans la barre de debug de symfony
+        //dump($post);
+
+        $form->handleRequest($request); // ici on utilise la méthode handlerequest() de notre objet Form afin de traiter la requête soumise
+
+        if ($form->isSubmitted() && $form->isValid()): // si le formulaire a été envoyé via notre button type submit et que les controles de contraintes éffectués dans notre entité Article et notre formulaire ArticleType, on rentre dans la condition
+            $article->setDateCrea(new \DateTime('now'));
+
+            $imageFile=$form->get('photo')->getData(); // equivalent à $_FILES (car notre champs photo dans articleType est de type FILE)
+            //dd($imageFile); // dd() equivalent de die() en PHP
+
+            if ($imageFile):
+
+                $nomImage=date("YmdHis")."-".uniqid()."-".$imageFile->getClientOriginalName();
+
+                $imageFile->move(
+                    $this->getParameter('images_directory'),
+                    $nomImage
+                );
+
+                $article->setPhoto($nomImage);
+
+                $manager->persist($article);
+                $manager->flush();
+
+                $this->addFlash("success", "L'article a bien été ajouté");
+
+                return $this->redirectToRoute("home");
+
+
+
+            endif;
+
+        endif;
+
+
+
+        return $this->render('admin/ajout_article.html.twig',[
+            'formu'=>$form->createView()
+        ]);
+
+    }
+
+
+    /**
+     * @Route ("/liste_articles", name="liste_articles")
+     */
+    public function liste_articles(ArticleRepository $articleRepository)
+    {
+
+        $articles=$articleRepository->findAll(); //on appelle ici le repository d'article qui nous permet d'effectuer les requêtes de SELECT. Ici SELECT * correspondant à findAll()
+
+
+        return $this->render('admin/liste_articles.html.twig', [
+            'articles'=>$articles
+        ]);
+    }
+
+    /**
+     * @Route ("/modif_article/{id}", name="modif_article")
+     */
+    public function modif_article(Article $article, Request $request, EntityManagerInterface $manager)
+    {
+        // ici nous sommes en modification, l'id a transité via l'url et notre objet $article est par conséquent chargé avec toutes ses données en bdd
+
+        $form=$this->createForm(ArticleType::class, $article, array('modifier'=>true));
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()):
+
+            $imageFile= $form->get('photoModif')->getData();
+
+        if ($imageFile):
+
+            $nomImage=date('YmdHis')."-".uniqid()."-".$imageFile->getClientOriginalName();
+
+            $imageFile->move($this->getParameter('images_directory'), $nomImage);
+
+            unlink($this->getParameter('images_directory')."/".$article->getPhoto());
+
+            $article->setPhoto($nomImage);
+
+            endif;
+                    $manager->persist($article);
+                    $manager->flush();
+
+                    $this->addFlash("success", "l'article a bien été modifié");
+
+                    return $this->redirectToRoute('liste_articles');
+
+            endif;
+
+
+
+        return $this->render('admin/modif_article.html.twig', [
+            'formu'=>$form->createView(),
+            'article'=>$article
+
+
+        ]);
+
+    }
+
+    /**
+     * @Route ("/supprime_article/{id}", name="supprime_article")
+     */
+    public function supprime_article(Article $article, EntityManagerInterface $manager)
+    {
+        $manager->remove($article);
+        $manager->flush();
+        $this->addFlash("success", "l'article a bien été supprimé");
+
+        return $this->redirectToRoute('liste_articles');
+
+    }
+
+
+    /**
+     *@Route ("/modif_categorie/{id}", name="modif_categorie")
+     *@Route("/ajout_categorie", name="ajout_categorie")
+     */
+    public function ajout_categorie(Request $request, EntityManagerInterface $manager, Categorie $categorie=null )
+    {
+
+        if (!$categorie): // si il n'y a pas d'objet catégorie, on instancie un nouvel objet catégorie, alors on est en ajout
+        $categorie=new Categorie();
+        endif;
+
+        $form=$this->createForm(CategorieType::class, $categorie);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()):
+
+            $idCategorie=$categorie->getId();
+            $manager->persist($categorie);
+            $manager->flush();
+
+            if ($idCategorie ==null):
+                $this->addFlash('success', 'la catégorie a bien été ajoutée');
+                else:
+                    $this->addFlash('success', 'la catégorie a bien été modifiée');
+                    endif;
+
+            return $this->redirectToRoute('liste_categories');
+
+            endif;
+
+        return $this->render("admin/ajout_categorie.html.twig",[
+           'formu'=>$form->createView()
+        ]);
+    }
+
+    /**
+     *@Route("/liste_categories", name="liste_categories")
+     */
+    public function liste_categories(CategorieRepository $repository)
+    {
+
+        $categories=$repository->findAll();
+        return $this->render("admin/liste_categories.html.twig",[
+            'categories'=>$categories
+        ]);
+    }
+
+
+
+
+
+
+
+
+}

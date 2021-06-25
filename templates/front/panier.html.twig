@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+    {{ parent() }}Panier
+{% endblock %}
+ {% block titre %}
+     Panier
+ {% endblock %}
+{% block body %}
+
+    <div class="container contpanier">
+        {% for message in app.flashes('success') %}
+            <div class="row mt-4">
+                <div class="alert alert-success col-md-12 text-center">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('alert') %}
+        <div class="row mt-4">
+            <div class="alert alert-danger col-md-12 text-center">
+                {{ message }}
+            </div>
+        </div>
+    {% endfor %}
+        <div class="row justify-content-center mt-4 mb-4">
+            <div class="col text-center"><h1> Panier </h1></div>
+        </div>
+        {% if panier is not empty %}
+
+
+        <table class="table">
+            <thead class="thead-dark text-center">
+            <tr>
+                <th>Nom</th>
+                <th>Ref</th>
+                <th>Photo</th>
+                <th>Prix Total</th>
+                <th>Quantité</th>
+                <th>Retirer</th>
+                <th>Ajouter</th>
+                <th>Annuler</th>
+            </tr>
+            </thead>
+            <tbody class="text-center">
+            {% for item in panier %}
+                <tr>
+                    <td>{{ item.article.nom }}</td>
+                    <td>{{ item.article.ref }}</td>
+                    <td><img height="40" width="40" src="{{ asset('Photos/') }}{{ item.article.photo }}"
+                             alt="{{ item.article.nom }}"></td>
+
+                    <td>{{ item.article.prix * item.quantite }} €</td>
+
+                    <td>{{ item.quantite }}</td>
+                    <td>
+                        <a href="{{ path('removecart', {'id': item.article.id}) }}">
+                            <button class="btn btn-danger text-white rounded">-</button>
+                        </a></td>
+                    <td>
+                        <a href="{{ path('addcart', {'id': item.article.id,'param':"panier"}) }}">
+                            <button class="btn btn-primary text-white rounded">+</button>
+                        </a></td>
+
+                    <td>
+                        <a href="{{ path('deletecart', {'id': item.article.id}) }}">
+                            <button class="btn btn-outline-danger rounded">Supprimer</button>
+                        </a></td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        <form class="mt-5" action="{{ path('verif_promo') }}" method="post">
+            <div class="form-group">
+                <label class="mb-4" for="">Vous avez un code promotionnel ?</label>
+                <div class="d-flex">
+                    <input class="form-control w-25 mb-4 rounded" name="promo" type="text"
+                           placeholder="Veuillez saisir votre code promo">
+
+                    <button class=" btn btn-light mb-4 ms-2 rounded" type="submit">Vérifier la validité</button>
+
+                </div>
+            </div>
+        </form>
+
+        {% if totalremise is defined %}
+
+            <div class="col-md-8 mt-2"><p>Total de la commande avant remise : <span
+                            style="text-decoration: line-through">{{ total }} €</span></p></div>
+            <div class="col-md-8 mt-2"><p>Montant total après remise : {{ totalremise }} €</p></div>
+        {% else %}
+            <div class="col-md-8 mt-2"><p>Total de la commande : {{ total }} €</p></div>
+        {% endif %}
+        {% if app.user %}
+
+            {% if totalremise is defined %}
+                <div class="col-md-4 mb-5"><a href="{{ path('commande',{'param':'remise'}) }}">
+                        <button class="btn btn-success rounded">Commander</button>
+                    </a>
+                </div>
+            {% else %}
+                <div class="col-md-4 mb-5"><a href="{{ path('commande') }}">
+                        <button class="btn btn-success rounded">Commander</button>
+                    </a>
+                </div>
+            {% endif %}
+
+        {% else %}
+
+
+            <div class="d-flex justify-content-center">
+                <div class="col-md-4 mb-5">
+                    <a href="{{ path('login') }}">
+                        <button class="btn btn-success rounded">Connectez-vous pour passer à la commande</button>
+                    </a>
+                    <a href="{{ path('registration') }}"> Pas encore inscrit ? Cliquez ici.</a>
+                </div>
+            </div>
+
+        {% endif %}
+            {% else %}
+        <div class="d-flex flex-column text-center">
+            <div class="mt-4 mb-4">
+                <h4> Votre panier est vide.</h4>
+            </div>
+            <div class="mt-4 mb-4">
+                <button class="btn btn-primary rounded"><a class="text-white text-decoration-none"
+                                                           href="{{ path('home') }}">Retour
+                        à la boutique</a></button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
